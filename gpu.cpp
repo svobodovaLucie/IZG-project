@@ -7,30 +7,25 @@
 
 #include <student/gpu.hpp>
 
-
-void runVertexAssembly(GPUContext &ctx,uint32_t nofVertices){
-    VertexArray const &vao = ctx.vao;   // vertex array
-
-    for(uint32_t i = 0; i < nofVertices; i++){
-    InVertex inVertex;
-    OutVertex outVertex;
-    
+void computeVertexID(GPUContext &ctx, InVertex &inVertex, uint32_t i) {
     // kontrola, zda je zapnuté indexování
-    if(vao.indexBuffer){  // vao.indexBuffer =! nullptr -> indexování je zapnuto
+    if(ctx.vao.indexBuffer){  // vao.indexBuffer =! nullptr -> indexování je zapnuto
       // 32-bitové indexování
-      if(vao.indexType == IndexType::UINT32)
-        inVertex.gl_VertexID = ((uint32_t*)vao.indexBuffer)[i];
+      if(ctx.vao.indexType == IndexType::UINT32)
+        inVertex.gl_VertexID = ((uint32_t*)ctx.vao.indexBuffer)[i];
       // 16-bitové indexování
-      else if(vao.indexType == IndexType::UINT16)
-        inVertex.gl_VertexID = ((uint16_t*)vao.indexBuffer)[i];
+      else if(ctx.vao.indexType == IndexType::UINT16)
+        inVertex.gl_VertexID = ((uint16_t*)ctx.vao.indexBuffer)[i];
       // 8-bitové indexování
-      else if(vao.indexType == IndexType::UINT8 )
-        inVertex.gl_VertexID = ((uint8_t *)vao.indexBuffer)[i];
+      else if(ctx.vao.indexType == IndexType::UINT8 )
+        inVertex.gl_VertexID = ((uint8_t *)ctx.vao.indexBuffer)[i];
 
-    }else{                // vao.indexBuffer == nullptr -> indexování není zapnuto
+    }else{  // vao.indexBuffer == nullptr -> indexování není zapnuto
       inVertex.gl_VertexID = i;
     }
+}
 
+void readAtributes(GPUContext &ctx, InVertex &inVertex) {
     // readAttributes()
     for(uint32_t j = 0; j < maxAttributes; j++){
       auto const &currPos = ctx.vao.vertexAttrib[j];
@@ -47,12 +42,37 @@ void runVertexAssembly(GPUContext &ctx,uint32_t nofVertices){
       if(currPos.type == AttributeType::VEC4 )
         inVertex.attributes[j].v4 = *(glm::vec4*)(((uint8_t*)currPos.bufferData) + currPos.offset + currPos.stride * inVertex.gl_VertexID);
     }
-    // volání vertexShaderu
-    ctx.prg.vertexShader(outVertex, inVertex, ctx.prg.uniforms);
+}
+
+void runVertexAssembly(GPUContext &ctx, InVertex &inVertex, uint32_t i){
+  computeVertexID(ctx, inVertex, i);
+  readAtributes(ctx, inVertex);
+}
+/*
+struct Triangle {
+  OutVertex points[3];
+};
+
+
+void loadTriangle(Triangle &triangle, GPUContext &ctx, InVertex inVertex, OutVertex outVertex, uint32_t tID, uint32_t nofVertices) {
+  
+  Triangle triangle;
+
+  for(unsigned i = 0; i < 3; i++) {
+    runVertexAssembly(ctx, nofVertices);
+    
   }
 }
 
 
+void runPrimitiveAssembly(GPUContext &ctx, uint32_t nofVertices) {
+
+  // vrchol co vyleze z vertex shaderu (x, y, z, w)
+  runVertexAssembly(ctx, nofVertices);
+
+}
+
+*/
 //! [drawTrianglesImpl]
 void drawTrianglesImpl(GPUContext &ctx,uint32_t nofVertices){
   //(void)ctx;
@@ -68,9 +88,54 @@ void drawTrianglesImpl(GPUContext &ctx,uint32_t nofVertices){
 
 
   /*************** 1. Úkol - naprogramovat vertex assembly jednotku a pouštění vertex shaderu ***************/
-  runVertexAssembly(ctx, nofVertices);
+  VertexArray const &vao = ctx.vao;   // vertex array
 
+  // for every vertex
+  for(uint32_t i = 0; i < nofVertices; i++){
+    InVertex inVertex;
+    OutVertex outVertex;
+  
+    runVertexAssembly(ctx, inVertex, i);
+
+    ctx.prg.vertexShader(outVertex, inVertex, ctx.prg.uniforms);
+  }
   /*************** 2. Úkol - naprogramovat Primitive Assembly jednotku, rasterizaci a pouštění fragment shaderu ***************/
+
+    //runPrimitiveAssembly(ctx, nofVertices);
+  
+/****
+
+void runPrimitiveAssembly(primitive,VertexArray vao,t,Program prg){
+  for(every vertex v in triangle){
+    InVertex inVertex;
+    runVertexAssembly(inVertex,vao,t+v);
+    prg.vertexShader(primitive.vertex,inVertex,prg.uniforms);
+  }
+}
+ 
+void rasterizeTriangle(frame,primitive,prg){
+  for(pixels in frame){
+    if(pixels in primitive){
+      InFragment inFragment;
+      createFragment(inFragment,primitive,barycentrics,pixelCoord,prg);
+      OutFragment outFragment;
+      prg.fragmentShader(outFragment,inFragment,uniforms);
+    }
+  }
+}
+ 
+void drawTriangles(GPUContext&ctx,uint32_t nofVertices){
+  for(every triangle t){
+    Primitive primitive;
+    runPrimitiveAssembly(primitive,ctx.vao,t,ctx.prg)
+ 
+    runPerspectiveDivision(primitive)
+    runViewportTransformation(primitive,ctx.frame)
+    rasterizeTriangle(ctx.frame,primitive,ctx.prg);
+  }
+} 
+ */
+
 
 }
 //! [drawTrianglesImpl]
