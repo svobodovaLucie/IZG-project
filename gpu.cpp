@@ -12,48 +12,15 @@
 #include <iostream>
 #include <cmath>
 
-// Absolutni hodnota
-#define ABS(x)          (((x) > 0) ? (x) : (-(x)))
-
 // Minimum ze dvou zadanych hodnot
 #define MIN(a, b)       (((a) < (b)) ? (a) : (b))
 
 // Maximum ze dvou zadanych hodnot
 #define MAX(a, b)       (((a) > (b)) ? (a) : (b))
 
-
-
-#define t0 triangle.points[0]
-#define t1 triangle.points[1]
-#define t2 triangle.points[2]
-
-#define tx0 triangle.points[0].gl_Position[0]
-#define tx1 triangle.points[1].gl_Position[0]
-#define tx2 triangle.points[2].gl_Position[0]
-
-#define ty0 triangle.points[0].gl_Position[1]
-#define ty1 triangle.points[1].gl_Position[1]
-#define ty2 triangle.points[2].gl_Position[1]
-
-#define tz0 triangle.points[0].gl_Position[2]
-#define tz1 triangle.points[1].gl_Position[2]
-#define tz2 triangle.points[2].gl_Position[2]
-
-#define tw0 triangle.points[0].gl_Position[3]
-#define tw1 triangle.points[1].gl_Position[3]
-#define tw2 triangle.points[2].gl_Position[3]
-
-
-
-
-
-
-
-
 struct Triangle{
   OutVertex points[3];
 };
-
 
 /*
 struct Triangle {
@@ -151,132 +118,22 @@ float TriangleArea(float x0, float y0, float x1, float y1, float x2, float y2)
 
 }
 */
-/*
+
 void runPerspectiveDivision(Triangle *triangle) {
   for(unsigned i = 0; i < 3; i++) {
     triangle->points[i].gl_Position.x = triangle->points[i].gl_Position.x / triangle->points[i].gl_Position.w;
     triangle->points[i].gl_Position.y = triangle->points[i].gl_Position.y / triangle->points[i].gl_Position.w;
     triangle->points[i].gl_Position.z = triangle->points[i].gl_Position.z / triangle->points[i].gl_Position.w;
-    // triangle->points[i].gl_Position.w = 1;
   }
 }
-*/
-/*
+
 void runViewportTransformation(Triangle *triangle, GPUContext &ctx) {
   for (unsigned i = 0; i < 3; i++) {
     triangle->points[i].gl_Position.x = (triangle->points[i].gl_Position.x * 0.5 + 0.5) * (ctx.frame.width);
     triangle->points[i].gl_Position.y = (triangle->points[i].gl_Position.y * 0.5 + 0.5) * (ctx.frame.height);
-    // z a w zustava?
+    // z a w zustava nezmenene po perspective division
   }
 }
-
-*/
-
-void runPerspectiveDivision(Triangle *triangle){
-  for(int i = 0; i < 3; i++){
-    triangle->points[i].gl_Position[0] /= triangle->points[i].gl_Position[3];
-    triangle->points[i].gl_Position[1] /= triangle->points[i].gl_Position[3];
-    triangle->points[i].gl_Position[2] /= triangle->points[i].gl_Position[3];
-    //triangle->points[i].gl_Position[3] = 1;
-  }
-}
-
-void runViewportTransformation(GPUContext &ctx, Triangle *triangle){
-  for(int i = 0; i < 3; i++){
-    triangle->points[i].gl_Position[0] += 1;
-    triangle->points[i].gl_Position[1] += 1;
-    triangle->points[i].gl_Position[0] *= (ctx.frame.width/2);
-    triangle->points[i].gl_Position[1] *= (ctx.frame.height/2);
-  }
-}
-/*
-bool myBar(Triangle *triangle, u_int32_t x, u_int32_t y) {
-  // vypocet obsahu
-
-    //printf("before: x0=%g, y0=%g, x1=%g, y1=%g, x2=%g, y2=%g\n", triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.x, triangle->points[1].gl_Position.y, triangle->points[2].gl_Position.x, triangle->points[2].gl_Position.y);
-  // printf("UNOx: %d, DUEy: %d\n", x, y);
-  float Sabc = TriangleArea(triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.x, triangle->points[1].gl_Position.y, triangle->points[2].gl_Position.x, triangle->points[2].gl_Position.y);
-  float Sabp = TriangleArea(triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.x, triangle->points[1].gl_Position.y, x, y);
-  float Sapc = TriangleArea(triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y, x, y, triangle->points[2].gl_Position.x, triangle->points[2].gl_Position.y);
-  float Spbc = TriangleArea(x, y, triangle->points[1].gl_Position.x, triangle->points[1].gl_Position.y, triangle->points[2].gl_Position.x, triangle->points[2].gl_Position.y);
-
-  float lambdaA = Spbc/Sabc;
-  float lambdaB = Sapc/Sabc;
-  float lambdaC = Sabp/Sabc;
-
-  // printf("ABC: %f\n", Sabc);
-  // printf("ABP: %f\n", Sabp);
-  // printf("APC: %f\n", Sapc);
-  // printf("PBC: %f\n", Spbc);
-  // printf("LAMBDA: %f\n", lambdaA + lambdaB + lambdaC);
-
-    // printf("before if : x=%g, y=%g\n", triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
-    
-  if (lambdaA + lambdaB + lambdaC == 1) {
-    // bod nalezi trojuhelniku
-    return true;
-  }
-  // bod nenalezi trojuhelniku
-  return false;
-}
-*/
-/*
-void runBarycentric(Triangle *triangle, GPUContext &ctx) {
-  // Nalezeni obalky (minX, maxX), (minY, maxY) trojuhleniku.
-  int minX = MIN(MIN(triangle->points[0].gl_Position.x, triangle->points[1].gl_Position.x), triangle->points[2].gl_Position.x);
-  int minY = MIN(MIN(triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.y), triangle->points[2].gl_Position.y);
-  int maxX = MAX(MAX(triangle->points[0].gl_Position.x, triangle->points[1].gl_Position.x), triangle->points[2].gl_Position.x);
-  int maxY = MAX(MAX(triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.y), triangle->points[2].gl_Position.y);
-
-    // Oriznuti obalky (minX, maxX, minY, maxY) trojuhleniku podle rozmeru okna.
-	minX = MAX(0, minX);
-	minY = MAX(0, minY);
-	maxX = MIN(ctx.frame.width - 1, maxX);
-	maxY = MIN(ctx.frame.height - 1, maxY);
-
-  // pruchod obalkou
-	for (int y = minY; y <= maxY; y++) {
-		bool even = (y - minY) % 2 == 0;
-
-		int startX = even ? minX : maxX;
-		int endX = even ? maxX : minX;
-		int stepX = even ? 1 : -1;
-
-		for (int x = startX; x != endX; x += stepX) {
-      // cyklus pres vsechny hodnoty v obdelniku
-      InFragment inFragment;
-      OutFragment outFragment;
-      if (myBar(triangle, x, y)) {
-        ctx.prg.fragmentShader(outFragment, inFragment, ctx.prg.uniforms);
-      }
-		}
-  }
-}
-/*
-/*
-
-void rasterizeTriangle(Triangle &triangle, GPUContext &ctx) {
-  // spočítat hranice trojúhelníku
-
-  // cyklus projde celý frame buffer
-  //for(u_int32_t y = 0; y < ctx.frame.height; y++){
-  //  for(u_int32_t x = 0; x < ctx.frame.width; x++){
-      //if (ctx.frame.depth[(ctx.frame.width * y) + x]) {
-          //InFragment inFragment;
-          //runBarycentric(triangle, ctx);
-          InFragment inFragment;
-      OutFragment outFragment;
-      //if (myBar(triangle, x, y)) {
-        ctx.prg.fragmentShader(outFragment, inFragment, ctx.prg.uniforms);
-          // createFragment(inFragment,primitive,barycentrics,pixelCoord,prg);
-          //OutFragment outFragment;
-          //ctx.prg.fragmentShader(outFragment,inFragment, ctx.prg.uniforms);
-      //}
-   // }
-  //}
-  
-}
-*/
 
 InVertex computeVertexID(InVertex inVertex, GPUContext &ctx, int i){
   if(ctx.vao.indexBuffer != nullptr){
@@ -328,9 +185,7 @@ void loadTriangle(GPUContext &ctx, uint32_t nofVertices, Triangle *triangle, int
     inVertex = computeVertexID(inVertex, ctx, i);
     inVertex = readAttributes(inVertex, ctx);
 
-    printf("befor: t=%d: x=%g, y=%g\n", i, triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
     ctx.prg.vertexShader(triangle->points[i - t],inVertex,ctx.prg.uniforms);
-    printf("after: t=%d: x=%g, y=%g\n", i, triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
   }
 }
 
@@ -364,132 +219,19 @@ glm::vec3 getBary(Triangle *triangle, float x, float y){
   return glm::vec3(calcBary2(p[3], p[0], p[1], p[2]));
 }
 
-glm::vec3 interpolate3(float x, float y, Triangle triangle, int k){
-    double area = tx0*(ty1-ty2) + tx1*(ty2-ty0) + tx2 * (ty0 - ty1);
-    area = fabs((area/2.0));
-    double area1 = x*(ty1-ty2) + tx1*(ty2-y) + tx2 * (y - ty1);
-    area1=fabs(area1/2.0);
-
-    double area2 = tx0*(y-ty2) + x*(ty2-ty0) + tx2 * (ty0 - y);
-    area2=fabs(area2/2.0);
-
-    double area3 = tx0*(ty1-y) + tx1*(y-ty0) + x * (ty0 - ty1);
-    area3=fabs(area3/2.0);
-
-    long double lambda1=area1/area;
-    long double lambda2=area2/area;
-    long double lambda3=area3/area;
-    double s = lambda1/tw0 + lambda2/tw1 + lambda3/tw2;
-    lambda1 = lambda1/(tw0*s);
-    lambda2 = lambda2/(tw1*s);
-    lambda3 = lambda3/(tw2*s);
-    glm::vec3 q;
-    double red = t0.attributes[k].v3[0]*lambda1 + t1.attributes[k].v3[0]*lambda2 + t2.attributes[k].v3[0]*lambda3;
-    double green = t0.attributes[k].v3[1]*lambda1 + t1.attributes[k].v3[1]*lambda2 + t2.attributes[k].v3[1]*lambda3;
-    double blue = t0.attributes[k].v3[2]*lambda1 + t1.attributes[k].v3[2]*lambda2 + t2.attributes[k].v3[2]*lambda3;
-    q=glm::vec3(red,green,blue);
-    return q;
-}
-
-glm::vec4 interpolate4(float x, float y, Triangle &triangle, int k){
-    double area = tx0*(ty1-ty2) + tx1*(ty2-ty0) + tx2 * (ty0 - ty1);
-    area = fabs((area/2.0));
-    double area1 = x*(ty1-ty2) + tx1*(ty2-y) + tx2 * (y - ty1);
-    area1=fabs(area1/2.0);
-
-    double area2 = tx0*(y-ty2) + x*(ty2-ty0) + tx2 * (ty0 - y);
-    area2=fabs(area2/2.0);
-
-    double area3 = tx0*(ty1-y) + tx1*(y-ty0) + x * (ty0 - ty1);
-    area3=fabs(area3/2.0);
-
-    long double lambda1=area1/area;
-    long double lambda2=area2/area;
-    long double lambda3=area3/area;
-    double s = lambda1/tw0 + lambda2/tw1 + lambda3/tw2;
-    lambda1 = lambda1/(tw0*s);
-    lambda2 = lambda2/(tw1*s);
-    lambda3 = lambda3/(tw2*s);
-    glm::vec4 q;
-    double red = t0.attributes[k].v4[0]*lambda1 + t1.attributes[k].v4[0]*lambda2 + t2.attributes[k].v4[0]*lambda3;
-    double green = t0.attributes[k].v4[1]*lambda1 + t1.attributes[k].v4[1]*lambda2 + t2.attributes[k].v4[1]*lambda3;
-    double blue = t0.attributes[k].v4[2]*lambda1 + t1.attributes[k].v4[2]*lambda2 + t2.attributes[k].v4[2]*lambda3;
-    double alpha = t0.attributes[k].v4[3]*lambda1 + t1.attributes[k].v4[3]*lambda2 + t2.attributes[k].v4[3]*lambda3;
-    q=glm::vec4(red,green,blue,alpha);
-    return q;
-}
-
-float is_in_triangle(float x, float y, Triangle &triangle, int number){
-    
-    double area = tx0*(ty1-ty2) + tx1*(ty2-ty0) + tx2 * (ty0 - ty1);
-    area = fabs(area/2.0);
-    double area1 = x*(ty1-ty2) + tx1*(ty2-y) + tx2 * (y - ty1);
-    area1=(area1/2.0);
-
-    double area2 = tx0*(y-ty2) + x*(ty2-ty0) + tx2 * (ty0 - y);
-    area2=(area2/2.0);
-
-    double area3 = tx0*(ty1-y) + tx1*(y-ty0) + x * (ty0 - ty1);
-    area3=(area3/2.0);
-
-    double total = area1+area2+area3;
-
-    if (number==1){
-        double lambda1=area1/area * tz0;
-        double lambda2=area2/area * tz1;
-        double lambda3=area3/area * tz2;
-
-        return lambda1 + lambda2 + lambda3;
-
-    }
-
-    if(number==2){
-
-    }
-    if(area1>=0.0 && area2>= 0.0 && area3>= 0.0){
-        return 1.0;
-    }
-
-    return 0;
-}
-
-void fixColor(OutFragment &outFragment){
-    if (outFragment.gl_FragColor[0]<0){
-        outFragment.gl_FragColor[0]=0.0f;
-    }
-    if (outFragment.gl_FragColor[1]<0){
-        outFragment.gl_FragColor[1]=0.0f;
-    }
-    if (outFragment.gl_FragColor[2]<0){
-        outFragment.gl_FragColor[2]=0.0f;
-    }
-    if (outFragment.gl_FragColor[0]>1){
-        outFragment.gl_FragColor[0]=1.0f;
-    }
-    if (outFragment.gl_FragColor[1]>1){
-        outFragment.gl_FragColor[1]=1.0f;
-    }
-    if (outFragment.gl_FragColor[2]>1){
-        outFragment.gl_FragColor[2]=1.0f;
-    }
-}
-
-
 void rasterize(GPUContext &ctx, Triangle *triangle) {
-  // spocitat hranice trojuhlenika
-    // Nalezeni obalky (minX, maxX), (minY, maxY) trojuhleniku.
+  // spočítat hranice trojúhelníku
   int minX = MIN(MIN(triangle->points[0].gl_Position.x, triangle->points[1].gl_Position.x), triangle->points[2].gl_Position.x);
   int minY = MIN(MIN(triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.y), triangle->points[2].gl_Position.y);
   int maxX = MAX(MAX(triangle->points[0].gl_Position.x, triangle->points[1].gl_Position.x), triangle->points[2].gl_Position.x);
   int maxY = MAX(MAX(triangle->points[0].gl_Position.y, triangle->points[1].gl_Position.y), triangle->points[2].gl_Position.y);
 
-    // Oriznuti obalky (minX, maxX, minY, maxY) trojuhleniku podle rozmeru okna.
 	minX = MAX(0, minX);
 	minY = MAX(0, minY);
 	maxX = MIN(ctx.frame.width - 1, maxX);
 	maxY = MIN(ctx.frame.height - 1, maxY);
 
-  // pruchod obalkou
+  // cyklus projde celý frame buffer
 	for (int y = minY; y <= maxY; y++) {
 		bool even = (y - minY) % 2 == 0;
 
@@ -498,59 +240,20 @@ void rasterize(GPUContext &ctx, Triangle *triangle) {
 		int stepX = even ? 1 : -1;
 
 		for (int x = startX; x != endX; x += stepX) {
-
-      // misko//////////////
-
-                    if (is_in_triangle(x+0.5,y+0.5,*triangle,0)==1.0) {
-                        InFragment inFragment;
-                        inFragment.gl_FragCoord = glm::vec4((double)x + 0.5f, (double)y + 0.5f, is_in_triangle(x+0.5,y+0.5,*triangle,1), 1.0f);
-                        for(size_t k=0; k< maxAttributes; k++){
-                            if(ctx.prg.vs2fs[k]!=AttributeType::EMPTY){
-                                if (ctx.prg.vs2fs[k]==AttributeType::FLOAT){
-
-                                }
-                                if (ctx.prg.vs2fs[k]==AttributeType::VEC2){
-
-                                }
-                                if (ctx.prg.vs2fs[k]==AttributeType::VEC3){
-                                    inFragment.attributes[k].v3=interpolate3(x+0.5,y+0.5,*triangle,k);
-
-                                }
-                                if (ctx.prg.vs2fs[k]==AttributeType::VEC4){
-                                    inFragment.attributes[k].v4=interpolate4(x+0.5,y+0.5,*triangle,k);
-                                }
-                            }
-                        }
-
-
-                        OutFragment outFragment;
-                        ctx.prg.fragmentShader(outFragment, inFragment, ctx.prg.uniforms);
-                        fixColor(outFragment);
-
-                        if(inFragment.gl_FragCoord[2] < ctx.frame.depth[y*ctx.frame.width+x]){
-                            *(ctx.frame.color+4*y*ctx.frame.width+x*4)   = ((float)*(ctx.frame.color+4*y*ctx.frame.width+x*4  )/255.f * (1.0f-outFragment.gl_FragColor[3])+outFragment.gl_FragColor[0]*outFragment.gl_FragColor[3])*255.f;
-                            *(ctx.frame.color+4*y*ctx.frame.width+x*4+1) = ((float)*(ctx.frame.color+4*y*ctx.frame.width+x*4+1)/255.f * (1.0f-outFragment.gl_FragColor[3])+outFragment.gl_FragColor[1]*outFragment.gl_FragColor[3])*255.f;
-                            *(ctx.frame.color+4*y*ctx.frame.width+x*4+2) = ((float)*(ctx.frame.color+4*y*ctx.frame.width+x*4+2)/255.f * (1.0f-outFragment.gl_FragColor[3])+outFragment.gl_FragColor[2]*outFragment.gl_FragColor[3])*255.f;
-                            if (outFragment.gl_FragColor[3]>0.5f) {
-                                *(ctx.frame.depth + y * ctx.frame.width + x) = inFragment.gl_FragCoord[2];
-                            }
-
-                        }
-                    }
-
-      // ////////////////
-      // cyklus pres vsechny hodnoty v obdelniku
-      /*InFragment inFragment;
-      OutFragment outFragment;
-      glm::vec3 bary = getBary(triangle, x+0.5, y+0.5);
-      auto soucet_lambda = bary[0] + bary[1] + bary[2];
-      // inFragment.gl_FragCoord = glm::vec4((double)x + 0.5f, (double)y + 0.5f, soucet_lambda, 1.0f);
-       printf("Soucet lambda = %f\n", soucet_lambda);
-      // if ((soucet_lambda >= 0.85 || soucet_lambda <= 1.15) || (bary[0] == 0 && (bary[1] + bary[2] == 1))) {
-      //  if (soucet_lambda == 1.0) {
-        ctx.prg.fragmentShader(outFragment, inFragment, ctx.prg.uniforms);
-      //  }*/
-		}
+        if (even && x > endX || !even && x < endX) {
+          break;
+        }
+        if (x != ctx.frame.width && y != ctx.frame.height) {
+          glm::vec3 bary = getBary(triangle, x+0.5f, y+0.5f);
+          float lambda_sum = bary[0] + bary[1] + bary[2];
+          if (lambda_sum < 1.001f && lambda_sum > 0.999f) {
+            InFragment inFragment;
+            inFragment.gl_FragCoord = glm::vec4((double)x + 0.5f, (double)y + 0.5f, 1.0f, 1.0f);
+            OutFragment outFragment;
+            ctx.prg.fragmentShader(outFragment, inFragment, ctx.prg.uniforms);
+          }
+        }
+      }
   }
 }
 
@@ -561,31 +264,12 @@ void drawTrianglesImpl(GPUContext &ctx,uint32_t nofVertices){
   /// Parametr "nofVertices" obsahuje počet vrcholů, který by se měl vykreslit (3 pro jeden trojúhelník).<br>
   /// Bližší informace jsou uvedeny na hlavní stránce dokumentace.
 
-  /*************** 1. Úkol - naprogramovat vertex assembly jednotku a pouštění vertex shaderu ***************/
-  /*************** 2. Úkol - naprogramovat Primitive Assembly jednotku, rasterizaci a pouštění fragment shaderu ***************/
-
-  // for(u_int32_t t = 0; t < nofVertices; t += 3) {
-    // Triangle triangle;
-    // runPrimitiveAssembly(&triangle, ctx, t);
-
 Triangle triangle;
-//printf("\n");
 for(int i = 0; i < nofVertices; i += 3){
   loadTriangle(ctx, nofVertices, &triangle, i);
-   // printf("t=%d: x=%g, y=%g\n", i, triangle.points[0].gl_Position.x, triangle.points[0].gl_Position.y);
-   // printf("t=%d: x=%g, y=%g\n", i, triangle.points[1].gl_Position.x, triangle.points[1].gl_Position.y);
-    //printf("t=%d: x=%g, y=%g\n", i, triangle.points[2].gl_Position.x, triangle.points[2].gl_Position.y);
-  // printf("UNO: %f, DUE: %f\n", triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
-  // printf("UNO: %f, DUE: %f\n", triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
-  // printf("UNO: %f, DUE: %f\n", triangle->points[0].gl_Position.x, triangle->points[0].gl_Position.y);
-  //printf("UNOx: %d, DUEy: %d\n", x, y);    
-  
     runPerspectiveDivision(&triangle);
-    runViewportTransformation(ctx, &triangle);
-    //rasterizeTriangle(triangle, ctx);
-    // runBarycentric(&triangle, ctx);
+    runViewportTransformation(&triangle, ctx);
     rasterize(ctx, &triangle);
-
   }
 }
 
